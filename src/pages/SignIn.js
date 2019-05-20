@@ -29,12 +29,17 @@ class SignIn extends Component {
 
     handleSubmit(e) {
         e.preventDefault();
-
+        const { email, password } = this.state;
+        axios.post('/api/users', { email, password })
+            .then((result) => {
+                this.props.history.push("/sign-in")
+            });
         console.log('The form was submitted with the following data:');
         console.log(this.state);
     }
 
     render() {
+        const { email, password } = this.state;
         return (
             <div className="FormCenter">
                 <form onSubmit={this.handleSubmit} className="FormFields" onSubmit={this.handleSubmit}>
@@ -54,7 +59,7 @@ class SignIn extends Component {
                     <div className="FormField">
                         <a target="_blank" href="">
                             <Link to="/search">
-                                <button className="FormField__Button mr-20">Sign In</button>
+                                <button id="signin" className="FormField__Button mr-20">Sign In</button>
                             </Link>
                         </a> <Link to="/" className="FormField__Link">Create an account</Link>
                     </div>

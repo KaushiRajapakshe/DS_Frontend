@@ -1,19 +1,21 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import { signUp } from './UserFunctions';
 import axios from 'axios';
 import '../jquery-3.3.1.min.js';
 import '../bundle.js';
 
 class SignUp extends Component {
-    constructor() {
-        super();
+
+    constructor(props) {
+        super(props);
 
         this.state = {
-            phoneNo: '',
-            email: '',
-            password: '',
             name: '',
+            phoneNo: '',
+            password: '',
+            cpassword: '',
+            nic: '',
+            email: '',
             hasAgreed: false
         };
 
@@ -33,28 +35,20 @@ class SignUp extends Component {
 
     handleSubmit(e) {
         e.preventDefault();
-
+        const { name, phoneNo, password, cpassword, nic, email } = this.state;
         console.log('The form was submitted with the following data:');
         console.log(this.state);
-
-        const user = {
-            name: this.state.name,
-            phoneNo: this.state.phoneNo,
-            email: this.state.email,
-            password: this.state.password,
-            hasAgreed: this.state.hasAgreed,
-        };
-        axios.post()
-        signUp(user).then(res => {
-            this.props.history.push('/signIn')
-        })
+        axios.post('/api/users', {name, phoneNo, password, cpassword, nic, email })
+            .then((result) => {
+                this.props.history.push("/")
+            });
     }
-
-    render() {
-        return (
-            <div className="FormCenter">
-                <form onSubmit={this.handleSubmit} className="FormFields">
-                    <div className="FormField">
+        render() {
+            const { name, phoneNo, password, cpassword, nic, email } = this.state;
+            return (
+                <div className="FormCenter">
+                    <form onSubmit={this.handleSubmit} className="FormFields" onSubmit={this.handleSubmit}>
+                        <div className="FormField">
                         <label className="FormField__Label" htmlFor="name">Full Name</label>
                         <input type="text" id="name" className="FormField__Input" placeholder="Enter your full name" name="name" required value={this.state.name} onChange={this.handleChange} />
                     </div>
@@ -62,10 +56,18 @@ class SignUp extends Component {
                         <label className="FormField__Label" htmlFor="phoneNo">Phone Number</label>
                         <input type="text" id="phoneNo" className="FormField__Input" pattern="[0-9]{10}" placeholder="Enter your phone number" name="phoneNo" required value={this.state.phoneNo} onChange={this.handleChange} />
                     </div>
+                     <div className="FormField">
+                         <label className="FormField__Label" htmlFor="password">Password</label>
+                         <input type="password" id="password" className="FormField__Input" placeholder="Enter your password" name="password" required value={this.state.cpassword} onChange={this.handleChange} />
+                     </div>
                     <div className="FormField">
-                        <label className="FormField__Label" htmlFor="password">Password</label>
-                        <input type="password" id="password" className="FormField__Input" placeholder="Enter your password" name="password" required value={this.state.password} onChange={this.handleChange} />
+                        <label className="FormField__Label" htmlFor="cpassword">Confirm Password</label>
+                        <input type="password" id="cpassword" className="FormField__Input" placeholder="Confirm your password" name="cpassword" required value={this.state.cpassword} onChange={this.handleChange} />
                     </div>
+                     <div className="FormField">
+                         <label className="FormField__Label" htmlFor="nic">NIC Number</label>
+                         <input type="text" id="nic" className="FormField__Input" placeholder="958463986V" name="nic" required value={this.state.nic} onChange={this.handleChange} />
+                     </div>
                     <div className="FormField">
                         <label className="FormField__Label" htmlFor="email">E-Mail Address</label>
                         <input type="email" id="email" className="FormField__Input" placeholder="Enter your email" name="email" required value={this.state.email} onChange={this.handleChange} />
@@ -78,7 +80,7 @@ class SignUp extends Component {
                     </div>
 
                     <div className="FormField">
-                        <Link to="/sign-in"><button className="FormField__Button mr-20">Sign Up</button></Link> <Link to="/sign-in" className="FormField__Link">I'm already member</Link>
+                        <Link to="/sign-in"><button id="signup" className="FormField__Button mr-20">Sign Up</button></Link> <Link to="/sign-in" className="FormField__Link">I'm already member</Link>
                     </div>
                 </form>
             </div>

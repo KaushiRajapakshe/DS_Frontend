@@ -41,7 +41,9 @@ class App extends Component {
                         <Route exact path="/buy" component={Buy}>
                         </Route>
                     </div>
-                    <Footer/>
+                    <div className="footer">
+                        <Footer/>
+                    </div>
                 </div>
             </Router>
 

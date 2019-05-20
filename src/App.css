@@ -1,12 +1,12 @@
 .App {
-  height: 100vh;
+  height: 90vh;
   display: flex;
   color: white;
   float: top;
 }
 
 .App__Aside {
-  width: 100%;
+  width: 90%;
   background-image: url("./images/back1.png");
 }
 
@@ -155,10 +155,10 @@
 .footer{
   position: absolute;
   left: 0;
-  top: 600px;
   bottom: 0;
   width: 100%;
   float: bottom;
+  display: flex;
   padding-bottom: 5px;
   padding-top: 15px;
 }

@@ -4,7 +4,6 @@ import '../../node_modules/bootstrap/dist/css/bootstrap.css';
 import axios from 'axios';
 import '../jquery-3.3.1.min.js';
 import '../bundle.js';
-import {signUp} from "./UserFunctions";
 
 import '../App.css';
 
@@ -18,10 +17,11 @@ class Buy extends Component {
             mobile: '',
             name: '',
             address: '',
+            nic: '',
             paymentMethod: '',
             cardNo: '',
             expireDate: '',
-            ccv: '',
+            cvc: '',
             mobileNo: '',
             pin: '',
         };
@@ -50,17 +50,19 @@ class Buy extends Component {
             mobile: this.state.mobile,
             name: this.state.name,
             address: this.state.address,
+            nic: this.state.nic,
             paymentMethod: this.state.paymentMethod,
             cardNo: this.state.cardNo,
             expireDate: this.state.expireDate,
-            ccv: this.state.ccv,
+            cvc: this.state.cvc,
             mobileNo: this.state.mobileNo,
             pin: this.state.pin,
         };
-        axios.post()
-        signUp(buy).then(res => {
-            this.props.history.push('/buy')
-        })
+        const { email, mobile, name, address, nic, paymentMethod, cardNo, expireDate, cvc, mobileNo, pin } = this.state;
+        axios.post('/api/buy', { email, mobile, name, address, nic, paymentMethod, cardNo, expireDate, cvc, mobileNo, pin })
+            .then((result) => {
+                this.props.history.push("/buy")
+            });
     }
 
     render() {
@@ -94,6 +96,12 @@ class Buy extends Component {
                                    name="address" required="" value={this.state.address} onChange={this.handleChange}/>
                         </div>
                         <div className="FormField">
+                            <label className="FormField__Label" htmlFor="nic">NIC Number</label>
+                            <input type="text" id="nic" className="FormField__Input"
+                                   placeholder="958463885V"
+                                   name="nic" required="" value={this.state.nic} onChange={this.handleChange}/>
+                        </div>
+                        <div className="FormField">
                             <label className="FormField__Label" htmlFor="paymentMethod">Payment Method</label><br/>
                             <input type="radio" name="paymentMethod" id="credit" value="card" checked/>Credit/Debit Card <br/>
                             <input type="radio" name="paymentMethod" id="mobile" value="bill"/>Add to Dialog Postpaid Bill
@@ -111,10 +119,10 @@ class Buy extends Component {
                                    onChange={this.handleChange}/>
                         </div>
                         <div className="FormField">
-                            <label className="FormField__Label" htmlFor="ccv">CCV</label>
-                            <input type="text" pattern="[0-9]{3}" id="ccv" className="FormField__Input"
+                            <label className="FormField__Label" htmlFor="cvc">CVC</label>
+                            <input type="text" pattern="[0-9]{3}" id="cvc" className="FormField__Input"
                                    placeholder="123"
-                                   name="ccv" required value={this.state.ccv} onChange={this.handleChange}/>
+                                   name="cvc" required value={this.state.cvc} onChange={this.handleChange}/>
                         </div>
                         <div className="FormField">
                             <label className="FormField__Label" htmlFor="mobileNo">Dialog Mobile Number</label>
@@ -127,12 +135,12 @@ class Buy extends Component {
                             <input type="text" id="pin" className="FormField__Input" placeholder="1234" name="pin"
                                    required="" value={this.state.pin} onChange={this.handleChange}/>
                         </div>
-                        <button className="FormField__Button1 mr-1">Request Pin</button>
+                        <button id="pin" className="FormField__Button1 mr-1">Request Pin</button>
                         <br/>
                         <br/>
                         <div className="FormField">
                             <Link to="/sign-in">
-                                <button className="FormField__Button mr-20">Proceed to Payment</button>
+                                <button id="buy" className="FormField__Button mr-20">Proceed to Payment</button>
                             </Link></div>
                     </form>
                 </div>

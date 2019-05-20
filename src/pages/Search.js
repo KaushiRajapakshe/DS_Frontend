@@ -4,7 +4,6 @@ import '../../node_modules/bootstrap/dist/css/bootstrap.css';
 import axios from 'axios';
 import '../jquery-3.3.1.min.js';
 import '../bundle.js';
-import {signUp} from "./UserFunctions";
 
 import '../App.css';
 
@@ -36,13 +35,16 @@ class Search extends Component {
         console.log('The form was submitted with the following data:');
         console.log(this.state);
 
-        const search = {
+        const search1 = {
             search: this.state.search,
         };
-        axios.post()
-        signUp(search).then(res => {
-            this.props.history.push('/search')
-        })
+        const { search } = this.state;
+        axios.post('/api/search', { search1 })
+            .then((result) => {
+                this.props.history.push("/search")
+            });
+        console.log('The form was submitted with the following data:');
+        console.log(this.state);
     }
 
     render() {
@@ -53,12 +55,12 @@ class Search extends Component {
                     </div>
                     <form onSubmit={this.handleSubmit} className="FormFields">
                         <div className="FormField">
-                            <input type="text" id="search" className="FormField__Input mr-20" placeholder="Search for book train "
-                                   name="search" required value={this.state.search} onChange={this.handleChange}/>
+                            <input type="text" id="searcht" className="FormField__Input mr-20" placeholder="Search for book train "
+                                   name="searcht" required value={this.state.search} onChange={this.handleChange}/>
                         </div>
                         <div className="FormField">
                             <Link to="/buy">
-                                <button className="FormField__Button mr-20">Search</button>
+                                <button id="search" className="FormField__Button mr-20">Search</button>
                             </Link></div>
                     </form>
                 </div>

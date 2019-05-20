@@ -1,19 +1,12 @@
-// CORS and CURD request configurations.
-axios.defaults.baseURL = 'http://localhost:8081';
+let tickets = [];
 
-// cart variables.
-// we initially push the fId of each food item selected, which can lead to the same fId,
-// being present more than once, hence we need to get the count of each fId's occurrences to,
-// determine the count that the each foodItem has being selected.
-let foodItems = [];
-
-function countFoodItems(foodItems) {
-    let countedFoodItems = foodItems.reduce((prev, cur) => {
+function countTickets(tickets) {
+    let countedTickets = tickets.reduce((prev, cur) => {
         prev[cur] = (prev[cur] || 0) + 1;
         return prev;
     }, {});
 
-    return countedFoodItems;
+    return countedTickets;
 }
 
 let headers = {};
@@ -34,45 +27,46 @@ function getHeaders() {
 // doesn't contain the authentication key).
 // this is done to maintain the baseURL with authentication key included given that the client has already,
 // being given an authentication key by the server.
-if (localStorage.getItem('authKey') != undefined) {
+if (localStorage.getItem('authKey') !== undefined) {
     headers.Authentication = localStorage.getItem('authKey');
     headers.ClientId = localStorage.getItem('uid');
 }
 
 // re-directions.
-$('#login-btn').click(function () {
-    window.location.href = 'login.html';
+$('#signup').click(function () {
+    window.location.href = 'SignUp.js';
 });
-$('#reg-btn').click(function () {
-    window.location.href = 'reg.html';
+$('#signin').click(function () {
+    window.location.href = 'SignIn.js';
 });
-$('#checkout-btn').click(function () {
-    if (localStorage.getItem('authKey') != undefined && localStorage.getItem('uid') != undefined) {
+$('#buy').click(function () {
+    if (localStorage.getItem('authKey') !== undefined && localStorage.getItem('uid') !== undefined) {
         window.location.href = 'buy.html';
     }
     else {
-        window.location.href = 'login.html';
+        window.location.href = 'SignUp.js';
     }
 });
 
 function redirectToHome() {
-    window.location.href = 'home.html';
+    window.location.href = 'App.js';
 }
-
-$('#reg-btn-submit').click(function () {
+// name, phoneNo, password, cpassword, nic, email
+$('#signup').click(function () {
     let data = {
         uid: 0,
-        name: $('#reg-name').val(),
-        email: $('#reg-email').val(),
-        address: $('#reg-address').val(),
-        mobileNumber: $('#reg-mobile').val(),
-        unhashedPassword: $('#reg-password').val()
+        name: $('#name').val(),
+        phoneNo: $('#phoneNo').val(),
+        password: $('#password').val(),
+        cpassword: $('#cpassword').val(),
+        nic: $('#nic').val(),
+        email: $('#email').val(),
     };
 
     axios.post('/user', data, { headers: getHeaders() })
         .then(response => {
             console.log(response.status);
-            if (response.status == 500) {
+            if (response.status === 500) {
                 alert("Please fill all the fields.");
             }
             window.location.href = response.data.redirect;
@@ -87,43 +81,43 @@ $('#reg-btn-submit').click(function () {
 $(document).ready(function () {
     let uid = localStorage.getItem("uid");
 
-    $('#checkout-btn').hide();  // enable if an item is selected.
+    $('#search').hide();  // enable if an item is selected.
 
     // show login,logout and register buttons appropriately.
     if (uid == undefined) {
-        $('#login-btn, #reg-btn').show();
-        $('#logout-btn').hide();
+        $('#signin, #signup').show();
+        $('#signin').hide();
     }
     else {
-        $('#login-btn, #reg-btn').hide();
-        $('#logout-btn').show();
+        $('#signin, #signup').hide();
+        $('#signin').show();
     }
 
-    $('#billPayment').hide(); // credit/debit card payment radio button is going to be selected by default.
+    $('#buy').hide(); // credit/debit card payment radio button is going to be selected by default.
 
-    $('#food-list').empty();
-    showFoodItems();
-    getAmountToPay();
+    $('#searcht').empty();
+    showTickets();
+    getTotalPay();
 });
 
 /*
  * Handling login.
  */
-$('#login-btn-submit').click(function () {
+$('#signin').click(function () {
     logMeIn();
 });
 function logMeIn() {
     // send credentials to the session API.
     let data = {
-        email: $('#login-email').val(),
-        password: $('#login-password').val()
+        email: $('#email').val(),
+        password: $('#password').val()
     };
 
     axios.post('/user/authenticate', data, { headers: getHeaders() })
         .then(response => {
             let responseBody = response.data;
 
-            if (responseBody.success == true) {
+            if (responseBody.success === true) {
                 // axios anyways store the response body in data. And the json reponse itself has a data attribute which contains the session.
                 localStorage.setItem('authKey', responseBody.data.authKeyOfUid);
                 localStorage.setItem('uid', responseBody.data.uid);
@@ -133,8 +127,8 @@ function logMeIn() {
                 headers.ClientId = localStorage.getItem('uid');
 
                 // hide the login and reg button and replace them with a logout button.
-                $('#login-btn, #reg-btn').hide();
-                $('#logout-btn').show();
+                $('#signin, #signup').hide();
+                $('#signin').show();
 
                 // redirection.
                 window.location.href = responseBody.redirect;
@@ -156,7 +150,7 @@ function logMeOut() {
         })
         .catch(reject => {
             console.log(reject);
-        })
+        });
 
     // clear all local storage variables(uid, authKeyOfUid, fid)
     localStorage.clear();
@@ -168,14 +162,14 @@ function logMeOut() {
 // when the buy button assigned to a certain food item is clicked.
 // we need to store this on local storage so that all the proceeding pages,
 // know which item is being purchased.
-function addToCart(fId) {
-    foodItems.push(fId);
-    localStorage.setItem('foodItems', JSON.stringify(countFoodItems(foodItems)));
+function addToCart(tId) {
+    tickets.push(tId);
+    localStorage.setItem('tickets', JSON.stringify(countTickets(tickets)));
 
     // let the user know.
     alert("Item added to the cart");
     // show the payment button.
-    $('#checkout-btn').val('Pay for ' + foodItems.length + ' item(s).').show();
+    $('#search').val('Pay for ' + tickets.length + ' item(s).').show();
 }
 
 // for the buying page to show the details.
@@ -186,9 +180,9 @@ function showFoodAndUserDetails() {
             let user = response.data;
 
             $('#email').val(user.email);
-            $('#mobile').val(user.mobileNumber);
+            $('#phoneNo').val(user.phoneNo);
             $('#name').val(user.name);
-            $('#address').val(user.address);
+            $('#nic').val(user.nic);
 
             console.log(user);
         })
@@ -197,7 +191,7 @@ function showFoodAndUserDetails() {
         });
 }
 
-function getAmountToPay() {
+function getTotalPay() {
     let data = (JSON).parse(localStorage.getItem('foodItems'));
 
     axios.post('/payment/total', data, { headers: getHeaders() })
@@ -209,7 +203,7 @@ function getAmountToPay() {
         });
 }
 
-$('#pin-btn').click(function () {
+$('#pin').click(function () {
     alert('Your pin is: 1234');
     // we aren't sending the pin to a mobile phone so we just display it here :(
 });
@@ -224,7 +218,7 @@ function makePayment() {
         uid: localStorage.getItem('uid'),
         paymentType: paymentType,
         paymentDate: new Date(),
-        itemsAndCounts: JSON.parse(localStorage.getItem('foodItems'))
+        itemsAndCounts: JSON.parse(localStorage.getItem('tickets'))
     };
 
     // payment information.
@@ -232,7 +226,7 @@ function makePayment() {
         case 'card':
             let cardDetails = {
                 number: $('#card-number').val(),
-                ccv: $('#ccv').val(),
+                cvc: $('#cvc').val(),
                 expiry: $('#exp-date').val()
             };
             data.paymentDetails = cardDetails;
@@ -248,18 +242,18 @@ function makePayment() {
             break;
     }
 
-    console.log(paymentType)
+    console.log(paymentType);
     console.log(data);
     axios.post('/payment', data, { headers: getHeaders() })
         .then(response => {
             let data = response.data;
-            if (data.success == true) {
+            if (data.success === true) {
                 localStorage.setItem('pid', data.pid.toString());
-                foodItems = [];
-                localStorage.setItem('foodItems', '');  // we need to erase the food items from local storage since the checkout has completed.
+                tickets = [];
+                localStorage.setItem('tickets', '');  // we need to erase the food items from local storage since the checkout has completed.
             }
 
-            if (data.redirect == 'home.html') { alert('Success! Redirecting to home.'); }
+            if (data.redirect === 'App.js') { alert('Success! Redirecting to home.'); }
             window.location.href = data.redirect;
         })
         .catch(reject => {
@@ -268,11 +262,11 @@ function makePayment() {
 }
 
 // for home page to show all the food items.
-function showFoodItems() {
-    axios.get('/food', { headers: getHeaders() })
+function showTickets() {
+    axios.get('/ticket', { headers: getHeaders() })
         .then(response=> {
             let entries = response.data;
-            mapFoodResults(entries, 'food-list', true);
+            mapFoodResults(entries, 'ticket-list', true);
         })
         .catch(rejection => {
 
@@ -280,17 +274,17 @@ function showFoodItems() {
 }
 
 // show relevant food items as the user is typing.
-$('#food-search').keypress(function () {
-    let keyword = $('#food-search').val();
+$('#ticket-search').keypress(function () {
+    let keyword = $('#search').val();
 
     // remove the current contents of the list first.
-    $('#food-list').empty();
+    $('#ticket-list').empty();
 
     console.log(getHeaders());
-    axios.get('/food/' + keyword, { headers: getHeaders() })
+    axios.get('/ticket/' + keyword, { headers: getHeaders() })
         .then(response=> {
             let entries = response.data;
-            mapFoodResults(entries, 'food-items', true);
+            mapFoodResults(entries, 'tickets', true);
         })
         .catch(rejection => {
 
@@ -306,7 +300,7 @@ function completePayment() {
     // common details.
     let data = {
 
-    }
+    };
     let paymentType = $('[name=paymentRadios]:checked').val();
     console.log(paymentType);
 }
@@ -359,27 +353,29 @@ function mapFoodResults(entries, targetHtmlTag, appendBtn) {
 }
 
 // POST the reg details to the server.
-$('#reg-submit-btn').click(function () {
+// name, phoneNo, password, cpassword, nic, email
+$('#signin').click(function () {
 
     let data = {
         "uid": 0,
-        "name": $('#nameReg').val(),
-        "email": $('#emailReg').val(),
-        "address": $('#addressReg').val(),
-        "password": $('#passwordReg').val(),
-        "mobileNumber": $('#mobileReg').val()
+        "name": $('#name').val(),
+        "phoneNo": $('#phoneNo').val(),
+        "password": $('#password').val(),
+        "cpassword": $('#cpassword').val(),
+        "nic": $('#nic').val(),
+        "email": $('#email').val()
     };
 
     // make sure to include uid attribute with 0 as its value.
     // otherwise the server will complain about a missing parameter.
     axios.post('/user', data, headers)
         .then(response => {
-            window.location.href = 'login.html';
+            window.location.href = 'SignUp.js';
         })
         .catch(rejection => {
             // for some reason axios catch a rejection even when the,
             // server accepts the POST data.
-            window.location.href = 'login.html';
+            window.location.href = 'SignUp.js';
         });
 });
 
@@ -399,9 +395,9 @@ function checkForAlphaNumericOnly(str) {
     return str.match(pattern);
 }
 
-$('#reg-name').keypress(function () {
-    let value = $('#reg-name').val();
-    let elem = $('#reg-name');
+$('#name').keypress(function () {
+    let value = $('#name').val();
+    let elem = $('#name');
 
     if (value != null && checkForAlphabeticOnly(value)) {
         elem.addClass('border border-success').removeClass('border-danger');
@@ -411,9 +407,9 @@ $('#reg-name').keypress(function () {
     }
 });
 
-$('#reg-mobile').keypress(function () {
-    let value = $('#reg-mobile').val();
-    let elem = $('#reg-mobile');
+$('#phoneNo').keypress(function () {
+    let value = $('#phoneNo').val();
+    let elem = $('#phoneNo');
 
     if (value != null && checkForNumericOnly(value)) {
         elem.addClass('border border-success').removeClass('border-danger');
@@ -423,9 +419,9 @@ $('#reg-mobile').keypress(function () {
     }
 });
 
-$('#card-number').keypress(function () {
-    let value = $('#card-number').val();
-    let elem = $('#card-number');
+$('#cardNo').keypress(function () {
+    let value = $('#cardNo').val();
+    let elem = $('#cardNo');
 
     if (value != null && checkForNumericOnly(value)) {
         elem.addClass('border border-success').removeClass('border-danger');
@@ -435,9 +431,9 @@ $('#card-number').keypress(function () {
     }
 });
 
-$('#ccv').keypress(function () {
-    let value = $('#ccv').val();
-    let elem = $('#ccv');
+$('#cvc').keypress(function () {
+    let value = $('#cvc').val();
+    let elem = $('#cvc');
 
     if (value != null && checkForNumericOnly(value)) {
         elem.addClass('border border-success').removeClass('border-danger');
@@ -447,9 +443,9 @@ $('#ccv').keypress(function () {
     }
 });
 
-$('#dialog-number').keypress(function () {
-    let value = $('#dialog-number').val();
-    let elem = $('#dialog-number');
+$('#mobileNo').keypress(function () {
+    let value = $('#mobileNo').val();
+    let elem = $('#mobileNo');
 
     if (value != null && checkForNumericOnly(value)) {
         elem.addClass('border border-success').removeClass('border-danger');
